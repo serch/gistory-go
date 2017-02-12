@@ -12,7 +12,7 @@ type gitCliStub struct {
 }
 
 func (cli *gitCliStub) git(args ...string) string {
-	result := ""
+	var result string
 	switch cmd := args[0]; cmd {
 	case "log":
 		result = "69ad2092|Wed, 1 Feb 2017 10:12:47 +0100\n1a616051|Tue, 31 Jan 2017 10:43:40 +0100"

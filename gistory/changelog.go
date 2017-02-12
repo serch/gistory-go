@@ -55,11 +55,10 @@ func (cl *changelog) versionChangesForCommits(commits []Commit) []VersionChange 
 
 func (cl *changelog) parseVersion(fileContent string) (string, error) {
 	matched := cl.versionRegex.FindStringSubmatch(fileContent)
-	if len(matched) > 0 {
-		return matched[1], nil
-	} else {
+	if len(matched) == 0 {
 		return "", errors.New("Couldn't find gem in lockfile")
 	}
+	return matched[1], nil
 }
 
 func compileRegexForGemVersion(gemName string) *regexp.Regexp {
