@@ -7,7 +7,7 @@ import (
 	"regexp"
 )
 
-const Lockfile string = "Gemfile.lock"
+const lockfile string = "Gemfile.lock"
 
 type changelog struct {
 	gemName      string
@@ -24,9 +24,9 @@ func NewChangelog(gemName string, repo Repo) *changelog {
 }
 
 func (cl *changelog) Changelog() []VersionChange {
-	commits := cl.repo.ChangesToFile(Lockfile)
+	commits := cl.repo.ChangesToFile(lockfile)
 	if len(commits) == 0 {
-		log.Fatalf("%s not found in git history", Lockfile)
+		log.Fatalf("%s not found in git history", lockfile)
 	}
 	return cl.versionChangesForCommits(commits)
 }
@@ -36,7 +36,7 @@ func (cl *changelog) versionChangesForCommits(commits []Commit) []VersionChange 
 	versionChanges := []VersionChange{}
 
 	for _, commit := range commits {
-		fileContent := cl.repo.FileContentAtCommit(Lockfile, commit.ShortHash)
+		fileContent := cl.repo.FileContentAtCommit(lockfile, commit.ShortHash)
 		version, err := cl.parseVersion(fileContent)
 
 		if err != nil {

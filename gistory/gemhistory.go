@@ -30,12 +30,12 @@ func Run(gemName string, repoPath string) {
 }
 
 func checkIfLockfileExistsOrExit(repoPath string) {
-	lockfilePath := path.Join(repoPath, Lockfile)
+	lockfilePath := path.Join(repoPath, lockfile)
 	exists, err := utils.FileOrDirExists(lockfilePath)
 	if err != nil {
 		log.Fatal(err)
 	}
 	if !exists {
-		log.Fatalf("%s not found in current directory\n", Lockfile)
+		log.Fatalf("%s not found in current directory\n", lockfile)
 	}
 }
