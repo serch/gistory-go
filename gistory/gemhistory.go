@@ -20,7 +20,7 @@ func Run(gemName string, repoPath string) {
 	}
 
 	fmt.Printf("Gem: %s\n", gemName)
-	fmt.Printf("Current version: %s\n\n", gemName)
+	fmt.Printf("Current version: %s\n\n", changes[0].Version)
 
 	fmt.Println("Change history:")
 	for _, change := range changes {
