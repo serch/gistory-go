@@ -9,21 +9,21 @@ import (
 
 const lockfile string = "Gemfile.lock"
 
-type changelog struct {
+type Changelog struct {
 	gemName      string
 	repo         Repo
 	versionRegex *regexp.Regexp
 }
 
-func NewChangelog(gemName string, repo Repo) *changelog {
-	cl := new(changelog)
+func NewChangelog(gemName string, repo Repo) *Changelog {
+	cl := new(Changelog)
 	cl.gemName = gemName
 	cl.repo = repo
 	cl.versionRegex = compileRegexForGemVersion(gemName)
 	return cl
 }
 
-func (cl *changelog) Changelog() []VersionChange {
+func (cl *Changelog) Changelog() []VersionChange {
 	commits := cl.repo.ChangesToFile(lockfile)
 	if len(commits) == 0 {
 		log.Fatalf("%s not found in git history", lockfile)
@@ -31,29 +31,51 @@ func (cl *changelog) Changelog() []VersionChange {
 	return cl.versionChangesForCommits(commits)
 }
 
-func (cl *changelog) versionChangesForCommits(commits []Commit) []VersionChange {
+func (cl *Changelog) versionChangesForCommits(commits []Commit) []VersionChange {
 	previousVersion := ""
 	versionChanges := []VersionChange{}
 
-	for _, commit := range commits {
-		fileContent := cl.repo.FileContentAtCommit(lockfile, commit.ShortHash)
-		version, err := cl.parseVersion(fileContent)
+	// no lockfile found or no changes to the lockfile found
+	if len(commits) == 0 {
+		return versionChanges
+	}
+
+	previousCommit := commits[0]
+	previousVersion, err := cl.gemVersionAtCommit(lockfile, previousCommit.ShortHash)
+	if err != nil {
+		// only one change to the lockfile was found and the gem was not there
+		return versionChanges
+	}
+
+	for _, currentCommit := range commits[1:] {
+		currentVersion, err := cl.gemVersionAtCommit(lockfile, currentCommit.ShortHash)
 
 		if err != nil {
 			// gem not found any more, it wasn't in the lockfile back then
 			break
 		}
 
-		if version != previousVersion {
-			versionChange := VersionChange{Version: version, Commit: commit}
+		if currentVersion != previousVersion {
+			versionChange := VersionChange{Version: previousVersion, Commit: previousCommit}
 			versionChanges = append(versionChanges, versionChange)
-			previousVersion = version
 		}
+		previousVersion = currentVersion
+		previousCommit = currentCommit
 	}
+
+	versionChange := VersionChange{Version: previousVersion, Commit: previousCommit}
+	versionChanges = append(versionChanges, versionChange)
+
 	return versionChanges
 }
 
-func (cl *changelog) parseVersion(fileContent string) (string, error) {
+func (cl *Changelog) gemVersionAtCommit(lockfile string, commitHash string) (string, error) {
+	fileContent := cl.repo.FileContentAtCommit(lockfile, commitHash)
+	version, err := cl.parseVersion(fileContent)
+	return version, err
+}
+
+func (cl *Changelog) parseVersion(fileContent string) (string, error) {
 	matched := cl.versionRegex.FindStringSubmatch(fileContent)
 	if len(matched) == 0 {
 		return "", errors.New("Couldn't find gem in lockfile")

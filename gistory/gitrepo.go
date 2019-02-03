@@ -13,24 +13,24 @@ import (
 
 const gitCliDateLayout string = "Mon, 2 Jan 2006 15:04:05 -0700"
 
-type gitRepo struct {
+type GitRepo struct {
 	Repo
 	path string
 	cli  gitClier
 }
 
-func NewGitRepo(path string, cli gitClier) *gitRepo {
+func NewGitRepo(path string, cli gitClier) *GitRepo {
 	checkGitFolderExistsOrExit(path)
 	if cli == nil {
 		cli = NewGitCli()
 	}
-	repo := new(gitRepo)
+	repo := new(GitRepo)
 	repo.path = path
 	repo.cli = cli
 	return repo
 }
 
-func (repo *gitRepo) ChangesToFile(filename string) []Commit {
+func (repo *GitRepo) ChangesToFile(filename string) []Commit {
 	commitsAndDates := repo.cli.git("log", "--pretty=format:%h|%cD", "--max-count=100", "--follow", filename)
 	if commitsAndDates == "" {
 		return []Commit{}
@@ -39,11 +39,11 @@ func (repo *gitRepo) ChangesToFile(filename string) []Commit {
 	return commits
 }
 
-func (repo *gitRepo) FileContentAtCommit(filename string, commitHash string) string {
+func (repo *GitRepo) FileContentAtCommit(filename string, commitHash string) string {
 	return repo.cli.git("show", fmt.Sprintf("%s:%s", commitHash, filename))
 }
 
-func (repo *gitRepo) parseCommitsAndDates(commitsAndDates []string) []Commit {
+func (repo *GitRepo) parseCommitsAndDates(commitsAndDates []string) []Commit {
 	commits := []Commit{}
 	for _, commitAndDate := range commitsAndDates {
 		split := strings.Split(commitAndDate, "|")

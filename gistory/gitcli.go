@@ -9,15 +9,15 @@ type gitClier interface {
 	git(args ...string) string
 }
 
-type gitCli struct {
+type GitCli struct {
 }
 
-func NewGitCli() *gitCli {
+func NewGitCli() *GitCli {
 	checkGitCliExistsOrExit()
-	return new(gitCli)
+	return new(GitCli)
 }
 
-func (cli *gitCli) git(args ...string) string {
+func (cli *GitCli) git(args ...string) string {
 	out, err := exec.Command("git", args...).Output()
 	if err != nil {
 		log.Fatal(err)
