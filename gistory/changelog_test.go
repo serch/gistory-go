@@ -44,7 +44,7 @@ type repoStub struct {
 	hashToVersion map[string]string
 }
 
-func NewRepoStub(hashToVersion map[string]string) *repoStub {
+func newRepoStub(hashToVersion map[string]string) *repoStub {
 	rs := new(repoStub)
 	rs.hashToVersion = hashToVersion
 	return rs
@@ -79,7 +79,7 @@ func TestVersionChangesForCommits_GemNotFoundInTheLockfile(t *testing.T) {
 	var hashToVersion = map[string]string{
 		"1234567": "another-gem (1.2.3)",
 	}
-	repo := NewRepoStub(hashToVersion)
+	repo := newRepoStub(hashToVersion)
 	changelog := NewChangelog("my-gem", repo)
 
 	var commits [1]Commit
@@ -102,7 +102,7 @@ func TestVersionChangesForCommits_MultipleCommits(t *testing.T) {
 		"6abcdef": "sidekiq (5.0.0)",
 		"7abcdef": "foobar (1.2.3)",
 	}
-	repo := NewRepoStub(hashToVersion)
+	repo := newRepoStub(hashToVersion)
 	changelog := NewChangelog("sidekiq", repo)
 
 	hashes := make([]string, 0)
