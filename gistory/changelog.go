@@ -9,21 +9,21 @@ import (
 
 const lockfile string = "Gemfile.lock"
 
-type changelog struct {
+type Changelog struct {
 	gemName      string
 	repo         Repo
 	versionRegex *regexp.Regexp
 }
 
-func NewChangelog(gemName string, repo Repo) *changelog {
-	cl := new(changelog)
+func NewChangelog(gemName string, repo Repo) *Changelog {
+	cl := new(Changelog)
 	cl.gemName = gemName
 	cl.repo = repo
 	cl.versionRegex = compileRegexForGemVersion(gemName)
 	return cl
 }
 
-func (cl *changelog) Changelog() []VersionChange {
+func (cl *Changelog) Changelog() []VersionChange {
 	commits := cl.repo.ChangesToFile(lockfile)
 	if len(commits) == 0 {
 		log.Fatalf("%s not found in git history", lockfile)
@@ -31,7 +31,7 @@ func (cl *changelog) Changelog() []VersionChange {
 	return cl.versionChangesForCommits(commits)
 }
 
-func (cl *changelog) versionChangesForCommits(commits []Commit) []VersionChange {
+func (cl *Changelog) versionChangesForCommits(commits []Commit) []VersionChange {
 	previousVersion := ""
 	versionChanges := []VersionChange{}
 
@@ -69,13 +69,13 @@ func (cl *changelog) versionChangesForCommits(commits []Commit) []VersionChange 
 	return versionChanges
 }
 
-func (cl *changelog) gemVersionAtCommit(lockfile string, commitHash string) (string, error) {
+func (cl *Changelog) gemVersionAtCommit(lockfile string, commitHash string) (string, error) {
 	fileContent := cl.repo.FileContentAtCommit(lockfile, commitHash)
 	version, err := cl.parseVersion(fileContent)
 	return version, err
 }
 
-func (cl *changelog) parseVersion(fileContent string) (string, error) {
+func (cl *Changelog) parseVersion(fileContent string) (string, error) {
 	matched := cl.versionRegex.FindStringSubmatch(fileContent)
 	if len(matched) == 0 {
 		return "", errors.New("Couldn't find gem in lockfile")
